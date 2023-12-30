@@ -3,6 +3,21 @@ import numpy as np
 from collections import OrderedDict
 
 
+def getInputs(k, dataset, inference=True):
+    """A helper function for the inference function"""
+    if inference:
+        x = dataset[k][0]
+        t = dataset[k][1]
+        y = dataset[k][2]
+        x = x.transpose(0, 1)
+        y = y.transpose(0, 1)
+    else:
+        x = torch.Tensor(dataset[k][0])
+        t = torch.Tensor(dataset[k][1])
+        y = torch.Tensor(dataset[k][2])
+    return x, t, y
+
+
 class DNN(torch.nn.Module):
     """
     A deep neural network class, meant to be used standalone or for PINNs
@@ -66,9 +81,10 @@ class DNN(torch.nn.Module):
         u_xx = torch.autograd.grad(u_x, x, grad_outputs=torch.ones_like(u_x), create_graph=True)[0]
         return u_t, u_x, u_xx
 
-    def traindnn(self, dataset, epochs, lr, batch=1, verbose=False):
+    def traindnn(self, dataset, epochs, lr, batch=1, verbose=False, inference=True):
         """
         This trains the network using the normal loss between the output and the target and does not use PDE residuals.
+        :param inference: if True, the dataset is a list of tuples, if False, the dataset is a list of lists
         :param x: the input list
         :param y: the target list
         :param epochs: the number of epochs to train for
@@ -81,12 +97,7 @@ class DNN(torch.nn.Module):
             index_list = np.arange(len(dataset))
             np.random.shuffle(index_list)
             for k in index_list:
-                x = dataset[k:k + batch][0]
-                t = dataset[k:k + batch][1]
-                y = dataset[k:k + batch][2]
-                # bring tensor to shape 1,n instead of n,1
-                x = x.transpose(0, 1)
-                y = y.transpose(0, 1)
+                x, t, y = getInputs(k, dataset, inference)
                 y_pred = self.forward(x, t)
                 loss = torch.nn.MSELoss()(y_pred, y)
                 optimizer.zero_grad()
@@ -95,7 +106,7 @@ class DNN(torch.nn.Module):
             if verbose:
                 print("Epoch {0}: {1}".format(epoch, loss.item()))
 
-    def testdnn(self, dataset, batch=1, simulator=None, verbose=False):
+    def testdnn(self, dataset, batch=1, simulator=None, verbose=False, inference=True):
         """
         This tests the network using the normal loss between the output and the target and does not use PDE residuals.
         :param x: the input list
@@ -108,12 +119,7 @@ class DNN(torch.nn.Module):
         pdes = []
         self.eval()
         for k in range(0, len(dataset), batch):
-            x = dataset[k:k + batch][0]
-            t = dataset[k:k + batch][1]
-            y = dataset[k:k + batch][2]
-            # bring tensor to shape 1,n instead of n,1
-            x = x.transpose(0, 1)
-            y = y.transpose(0, 1)
+            x, t, y = getInputs(k, dataset, inference)
             y_pred = self.forward(x, t)
             loss = torch.nn.MSELoss()(y_pred, y)
             if simulator:
@@ -126,4 +132,3 @@ class DNN(torch.nn.Module):
             print("Loss: {0}".format(sum(losses) / len(losses)))
             if simulator:
                 print("PDE: {0}".format(sum(pdes) / len(pdes)))
-

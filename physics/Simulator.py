@@ -47,15 +47,21 @@ class Simulator:
     def getTime(self):
         return self.time
 
-    def getPositionList(self):
-        return self.positionList
+    def getInitialPosition(self):
+        return self.initialPosition
 
-    def getVelocityList(self):
-        return self.velocityList
+    def getInitialVelocity(self):
+        return self.initialVelocity
 
-    def getAccelerationList(self):
-        return self.accelerationList
+    def getInitialAcceleration(self):
+        return self.initialAcceleration
 
-    def getTimeList(self):
-        return self.timeList
+    def getX(self):
+        pass
+
+    def getV(self):
+        pass
+
+    def getA(self):
+        pass
 

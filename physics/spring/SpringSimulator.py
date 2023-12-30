@@ -87,7 +87,7 @@ class SpringSimulator(Simulator):
         """Returns the time list of the spring as a pytorch tensor."""
         return torch.tensor([self.timeList[:-1]])
 
-    def getU(self):
+    def getXNext(self):
         """Returns all calculated next states of the spring as a pytorch tensor (position, velocity, acceleration)."""
         return torch.tensor([self.positionList[1:]])
 

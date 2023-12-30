@@ -14,7 +14,7 @@ class SimulatorDataset(torch.utils.data.Dataset):
         self.simulator = simulator
         self.x = simulator.getX().flatten().unsqueeze(1)
         self.t = simulator.getT().flatten().unsqueeze(1)
-        self.u_target = simulator.getU().flatten().unsqueeze(1)
+        self.u_target = simulator.getXNext().flatten().unsqueeze(1)
 
     def __getitem__(self, index):
         """
